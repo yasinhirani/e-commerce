@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect } from "react";
+import { connect } from "react-redux";
+import { getProducts } from "./actions/action";
+import axios from "axios";
+import Header from './Header';
+import "./App.css";
+import { Routes, Route } from 'react-router-dom';
+import ProductListing from "./ProductListing";
+import ProductDetails from "./ProductDetails";
+import Cart from "./Cart";
 
-function App() {
+const mapStateToProps = (state) => ({
+  data: state.productData,
+});
+const mapDispatchToProps = (dispatch) => ({
+  addProductHandler: (data) => {
+    dispatch(getProducts(data));
+  },
+});
+
+function App(props) {
+  // console.log(props.data.products);
+
+  useEffect(async () => {
+    const res = await axios.get('https://fakestoreapi.com/products');
+    props.addProductHandler(res.data);
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="w-full h-full flex flex-col">
+    <Header />
+    <Routes>
+      <Route path="/" element={<ProductListing />}></Route>
+      <Route path="/details/:id" element={<ProductDetails />}></Route>
+      <Route path="/cart" element={<Cart />}></Route>
+    </Routes>
     </div>
   );
 }
-
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+export { App };
